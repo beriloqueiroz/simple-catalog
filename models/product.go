@@ -40,3 +40,24 @@ func ListAll() []Product {
 	defer conn.Close()
 	return products
 }
+
+func Insert(product Product) {
+	conn := db.InitConnection()
+	stmt, err := conn.Prepare("insert into products (name, description, price, quantity) values ($1, $2, $3, $4)")
+	if err != nil {
+		panic(err.Error())
+	}
+	stmt.Exec(product.Name, product.Description, product.Price, product.Quantity)
+	defer conn.Close()
+}
+
+func Delete(id string) {
+	conn := db.InitConnection()
+	delete, err := conn.Prepare("delete from products where Id=$1")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	delete.Exec(id)
+	defer conn.Close()
+}
