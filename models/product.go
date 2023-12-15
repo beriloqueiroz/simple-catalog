@@ -51,6 +51,16 @@ func Insert(product Product) {
 	defer conn.Close()
 }
 
+func Update(product Product) {
+	conn := db.InitConnection()
+	stmt, err := conn.Prepare("update products set name=$1, description=$2, price=$3, quantity=$4 where id=$5")
+	if err != nil {
+		panic(err.Error())
+	}
+	stmt.Exec(product.Name, product.Description, product.Price, product.Quantity, product.Id)
+	defer conn.Close()
+}
+
 func Delete(id string) {
 	conn := db.InitConnection()
 	delete, err := conn.Prepare("delete from products where Id=$1")
@@ -60,4 +70,35 @@ func Delete(id string) {
 
 	delete.Exec(id)
 	defer conn.Close()
+}
+
+func Find(id string) Product {
+	conn := db.InitConnection()
+	productQuery, err := conn.Prepare("select * from products where Id=$1")
+	if err != nil {
+		panic(err.Error())
+	}
+	product, err := productQuery.Query(id)
+	if err != nil {
+		panic(err.Error())
+	}
+	p := Product{}
+	for product.Next() {
+		var id, quantity int
+		var name, description string
+		var price float64
+
+		err = product.Scan(&id, &name, &description, &price, &quantity)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		p.Name = name
+		p.Description = description
+		p.Id = id
+		p.Quantity = quantity
+		p.Price = price
+	}
+	defer conn.Close()
+	return p
 }
