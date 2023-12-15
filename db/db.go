@@ -14,3 +14,11 @@ func InitConnection() *sql.DB {
 	}
 	return db
 }
+
+func CreateTables() {
+	conn := InitConnection()
+	_, err := conn.Query("create table IF NOT EXISTS products (id serial primary key, name varchar, description varchar,	price decimal, quantity integer)")
+	if err != nil {
+		panic(err.Error())
+	}
+}
